@@ -30,9 +30,11 @@ import { LEGACY_STYLE_MAP, type LayoutCustom, type SavedDocument, type SavedForm
 import StyleGallery from './components/docs/StyleGallery';
 import Studio from './components/docs/Studio';
 import LibraryPanel from './components/docs/LibraryPanel';
+import Gate from './components/docs/Gate';
 import './styles/sheets.css';
 
 const DATA_KEY = 'macau-docs-data';
+const GATE_KEY = 'macau-docs-gate';
 const CUSTOM_KEY = 'macau-docs-custom';
 const STYLE_KEY = 'macau-docs-style';
 
@@ -62,7 +64,16 @@ function customForStyle(styleId: StyleId | null, base: LayoutCustom): LayoutCust
   };
 }
 
+function readGateUnlocked(): boolean {
+  try {
+    return sessionStorage.getItem(GATE_KEY) === 'ok';
+  } catch {
+    return false;
+  }
+}
+
 export default function App() {
+  const [unlocked, setUnlocked] = useState(readGateUnlocked);
   const [step, setStep] = useState<'gallery' | 'studio'>('gallery');
   const [styleId, setStyleId] = useState<StyleId | null>(() => readStyle(readJson(STYLE_KEY, null)));
   const [custom, setCustom] = useState<LayoutCustom>(() =>
@@ -376,6 +387,21 @@ export default function App() {
   };
 
   const activeFile = files.find((item) => item.id === activeFileId) || null;
+
+  if (!unlocked) {
+    return (
+      <Gate
+        onUnlock={() => {
+          try {
+            sessionStorage.setItem(GATE_KEY, 'ok');
+          } catch {
+            /* ignore */
+          }
+          setUnlocked(true);
+        }}
+      />
+    );
+  }
 
   return (
     <div
