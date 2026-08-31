@@ -1,5 +1,17 @@
 import { addDaysISO, makeSeriesId, newId, INVOICE_DUE_DAYS, QUOTE_VALID_DAYS, todayISO } from '../lib/money';
-import type { DocData, LineItem } from '../types/doc';
+import type { DocData, LineItem, Party } from '../types/doc';
+
+export function emptyParty(): Party {
+  return {
+    name: '',
+    nameSecondary: '',
+    address: '',
+    phone: '',
+    email: '',
+    registrationNo: '',
+    taxNo: '',
+  };
+}
 
 export function emptyItem(): LineItem {
   return {
@@ -77,5 +89,33 @@ export function createDefaultDoc(): DocData {
     chopScale: 100,
     chopX: 0,
     chopY: 0,
+  };
+}
+
+export function createFreshDoc(from?: DocData): DocData {
+  const issueDate = todayISO();
+  const next = createDefaultDoc();
+  if (!from) return next;
+  return {
+    ...next,
+    seriesId: makeSeriesId(),
+    issueDate,
+    dueDate: addDaysISO(issueDate, INVOICE_DUE_DAYS),
+    validUntil: addDaysISO(issueDate, QUOTE_VALID_DAYS),
+    seller: from.seller,
+    currency: from.currency,
+    paymentMethod: from.paymentMethod,
+    paymentTerms: from.paymentTerms,
+    bankInfo: from.bankInfo,
+    logoDataUrl: from.logoDataUrl,
+    chopDataUrl: from.chopDataUrl,
+    logoScale: from.logoScale,
+    chopScale: from.chopScale,
+    chopX: from.chopX,
+    chopY: from.chopY,
+    buyer: emptyParty(),
+    items: [emptyItem()],
+    discount: 0,
+    notes: '',
   };
 }

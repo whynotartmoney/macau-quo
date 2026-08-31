@@ -137,10 +137,27 @@ export default function CustomizePanel({
         </div>
       </div>
 
-      <label className="flex items-center justify-between text-[12px] text-neutral-700">
-        顯示英文
-        <input type="checkbox" checked={custom.bilingual} onChange={(e) => set('bilingual', e.target.checked)} />
-      </label>
+      <div>
+        <div className="text-[11px] text-neutral-500 mb-2">單據文字</div>
+        <div className="flex gap-2">
+          {([
+            ['zh', '中文'],
+            ['en', '英文'],
+            ['both', '中英'],
+          ] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onChange({ ...custom, labelLang: id, bilingual: id !== 'zh' })}
+              className={`flex-1 text-[12px] rounded-lg px-2 py-2 border ${
+                (custom.labelLang || 'zh') === id ? 'border-neutral-900 text-neutral-900' : 'border-neutral-300 text-neutral-500'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <label className="flex items-center justify-between text-[12px] text-neutral-700">
         顯示印章欄
         <input type="checkbox" checked={custom.showChop} onChange={(e) => set('showChop', e.target.checked)} />

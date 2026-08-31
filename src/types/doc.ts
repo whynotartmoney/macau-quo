@@ -18,6 +18,8 @@ export type DensityId = 'compact' | 'regular' | 'airy';
 
 export type FontPreset = 'serif' | 'sans' | 'display' | 'gothic';
 
+export type LabelLang = 'zh' | 'en' | 'both';
+
 export type LineItem = {
   id: string;
   description: string;
@@ -69,6 +71,7 @@ export type LayoutCustom = {
   density: DensityId;
   fontPreset: FontPreset;
   bilingual: boolean;
+  labelLang: LabelLang;
   showChop: boolean;
   headerAlign: 'left' | 'center' | 'split';
   showChineseAmount: boolean;
@@ -81,6 +84,23 @@ export type SavedFormat = {
   savedAt: string;
   styleId: StyleId;
   custom: LayoutCustom;
+};
+
+export type SavedDocument = {
+  id: string;
+  name: string;
+  savedAt: string;
+  styleId: StyleId;
+  custom: LayoutCustom;
+  data: DocData;
+};
+
+export const DOCUMENT_FILE_KIND = 'macau-docs-file';
+
+export type DocumentFilePayload = {
+  kind: typeof DOCUMENT_FILE_KIND;
+  version: 1;
+  document: SavedDocument;
 };
 
 export type Totals = {

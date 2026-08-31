@@ -6,7 +6,12 @@ import { DEFAULT_CUSTOM } from '../data/styles';
 const KEY = 'macau-docs-formats';
 
 export function normalizeCustom(raw?: Partial<LayoutCustom> | null): LayoutCustom {
-  return { ...DEFAULT_CUSTOM, ...(raw || {}) };
+  const merged = { ...DEFAULT_CUSTOM, ...(raw || {}) };
+  if (!raw?.labelLang && raw?.bilingual) merged.labelLang = 'both';
+  if (merged.labelLang !== 'zh' && merged.labelLang !== 'en' && merged.labelLang !== 'both') {
+    merged.labelLang = 'zh';
+  }
+  return merged;
 }
 
 function migrateSecondary(value?: string): string | undefined {

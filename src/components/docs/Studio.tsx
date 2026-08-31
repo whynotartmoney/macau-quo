@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { Image, FileText, Layers, Loader2 } from 'lucide-react';
+import { Image, FileText, Layers, Loader2, Save, FolderClosed } from 'lucide-react';
 import type { DocData, DocType, LayoutCustom, SavedFormat, StyleId } from '../../types/doc';
 import { STYLE_LIST } from '../../data/styles';
 import { exportJpg, exportPdf, fileBase } from '../../lib/exportDoc';
@@ -13,6 +13,9 @@ type Props = {
   custom: LayoutCustom;
   data: DocData;
   formats: SavedFormat[];
+  fileName: string | null;
+  onOpenLibrary: () => void;
+  onSave: () => void;
   onCustomChange: (next: LayoutCustom) => void;
   onDataChange: (next: DocData) => void;
   onChangeStyle: () => void;
@@ -32,6 +35,9 @@ export default function Studio({
   custom,
   data,
   formats,
+  fileName,
+  onOpenLibrary,
+  onSave,
   onCustomChange,
   onDataChange,
   onChangeStyle,
@@ -100,6 +106,29 @@ export default function Studio({
               更換
             </button>
           </div>
+          <div className="flex gap-2 mb-3">
+            <button
+              type="button"
+              onClick={onSave}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-2 text-[12px] text-white"
+            >
+              <Save className="w-3.5 h-3.5" />
+              {fileName ? '儲存' : '存成文件'}
+            </button>
+            <button
+              type="button"
+              onClick={onOpenLibrary}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-[12px] text-neutral-800"
+            >
+              <FolderClosed className="w-3.5 h-3.5" />
+              文件
+            </button>
+          </div>
+          {fileName && (
+            <div className="mb-3 text-[11px] text-neutral-500 truncate" title={fileName}>
+              目前：{fileName}
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setShowCustom((v) => !v)}
@@ -123,7 +152,8 @@ export default function Studio({
       </aside>
 
       <section className="bg-[#d2d2d2] flex flex-col min-w-0">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-neutral-300 bg-[#e4e4e4]">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-neutral-300 bg-[#e4e4e4]">
+          <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-full bg-white p-1 border border-neutral-300">
             {DOCS.map((doc) => (
               <button
@@ -137,6 +167,25 @@ export default function Studio({
                 {doc.label}
               </button>
             ))}
+          </div>
+          <div className="flex rounded-full bg-white p-1 border border-neutral-300">
+            {([
+              ['zh', '中'],
+              ['en', 'EN'],
+              ['both', '中EN'],
+            ] as const).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onCustomChange({ ...custom, labelLang: id, bilingual: id !== 'zh' })}
+                className={`px-3 py-1.5 rounded-full text-[12px] ${
+                  (custom.labelLang || 'zh') === id ? 'bg-neutral-900 text-white' : 'text-neutral-600'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
