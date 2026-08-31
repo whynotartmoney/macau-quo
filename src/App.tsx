@@ -122,6 +122,21 @@ export default function App() {
   }, [styleId]);
 
   useEffect(() => {
+    if (!styleId || styleId === 'custom') return;
+    const meta = STYLE_LIST.find((s) => s.id === styleId);
+    if (!meta) return;
+    const legacy: Partial<Record<StyleId, string[]>> = {
+      classic: ['#f7d4d6', '#f7f1e8'],
+      navy: ['#f3eee4'],
+    };
+    const olds = (legacy[styleId] || []).map((c) => c.toLowerCase());
+    setCustom((prev) => {
+      if (!olds.includes(prev.paper.toLowerCase())) return prev;
+      return { ...prev, paper: meta.paper };
+    });
+  }, [styleId]);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       const [stored, active, handle] = await Promise.all([
@@ -381,8 +396,10 @@ export default function App() {
     if (appliedFormatId === id) setAppliedFormatId(null);
   };
 
-  const enterStudio = () => {
-    if (!styleId) return;
+  const enterStudio = (id?: StyleId) => {
+    const next = id || styleId;
+    if (!next) return;
+    if (id) pickStyle(id);
     setStep('studio');
   };
 
@@ -456,7 +473,7 @@ export default function App() {
               <button
                 type="button"
                 disabled={!styleId}
-                onClick={enterStudio}
+                onClick={() => enterStudio()}
                 className="inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white px-4 py-2 text-[13px] disabled:opacity-40"
               >
                 填寫內容
@@ -481,6 +498,7 @@ export default function App() {
             selected={styleId}
             custom={custom}
             onSelect={pickStyle}
+            onEnter={enterStudio}
             formats={formats}
             appliedFormatId={appliedFormatId}
             onApplyFormat={applyFormat}
@@ -494,7 +512,7 @@ export default function App() {
             <div className="mt-8 flex justify-center">
               <button
                 type="button"
-                onClick={enterStudio}
+                onClick={() => enterStudio()}
                 className="inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white px-6 py-3 text-[14px]"
               >
                 使用「{STYLE_LIST.find((s) => s.id === styleId)?.name}」開始填寫

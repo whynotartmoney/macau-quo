@@ -8,6 +8,7 @@ type Props = {
   selected: StyleId | null;
   custom: LayoutCustom;
   onSelect: (id: StyleId) => void;
+  onEnter: (id: StyleId) => void;
   formats: SavedFormat[];
   appliedFormatId: string | null;
   onApplyFormat: (id: string) => void;
@@ -24,6 +25,7 @@ export default function StyleGallery({
   selected,
   custom,
   onSelect,
+  onEnter,
   formats,
   appliedFormatId,
   onApplyFormat,
@@ -104,6 +106,7 @@ export default function StyleGallery({
       )}
 
       <section>
+        <p className="text-[13px] text-neutral-500 mb-4">單擊選取，雙擊進入填寫。</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
           {STYLE_LIST.map((style) => {
             const active = selected === style.id && !appliedFormatId;
@@ -113,6 +116,7 @@ export default function StyleGallery({
                 type="button"
                 aria-label={style.name}
                 onClick={() => onSelect(style.id)}
+                onDoubleClick={() => onEnter(style.id)}
                 className={`text-left group rounded-xl overflow-hidden border bg-white transition ${
                   active ? 'border-neutral-900 ring-2 ring-neutral-900/15' : 'border-neutral-300 hover:border-neutral-500'
                 }`}

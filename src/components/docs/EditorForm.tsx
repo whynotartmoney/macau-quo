@@ -28,6 +28,49 @@ function Field({
 const inputClass =
   'w-full rounded-lg bg-white border border-neutral-300 px-3 py-2 text-[13px] text-neutral-900 outline-none focus:border-neutral-800';
 
+function sanitizeAmount(raw: string, integer?: boolean): string {
+  let next = raw.replace(/[^\d.]/g, '');
+  if (integer) return next.replace(/\./g, '');
+  const dot = next.indexOf('.');
+  if (dot === -1) return next;
+  return `${next.slice(0, dot + 1)}${next.slice(dot + 1).replace(/\./g, '')}`;
+}
+
+function toAmount(raw: string): number {
+  if (!raw || raw === '.') return 0;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function AmountInput({
+  value,
+  onChange,
+  integer,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  integer?: boolean;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft !== null ? draft : String(value ?? 0);
+
+  return (
+    <input
+      type="text"
+      inputMode={integer ? 'numeric' : 'decimal'}
+      className={inputClass}
+      value={shown}
+      onFocus={() => setDraft(String(value ?? 0))}
+      onChange={(e) => {
+        const next = sanitizeAmount(e.target.value, integer);
+        setDraft(next);
+        onChange(toAmount(next));
+      }}
+      onBlur={() => setDraft(null)}
+    />
+  );
+}
+
 function SliderRow({
   label,
   value,
@@ -491,23 +534,16 @@ export default function EditorForm({ data, onChange }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Field label="數量">
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  className={inputClass}
+                <AmountInput
+                  integer
                   value={item.quantity}
-                  onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) })}
+                  onChange={(quantity) => updateItem(item.id, { quantity })}
                 />
               </Field>
               <Field label="單價">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className={inputClass}
+                <AmountInput
                   value={item.unitPrice}
-                  onChange={(e) => updateItem(item.id, { unitPrice: Number(e.target.value) })}
+                  onChange={(unitPrice) => updateItem(item.id, { unitPrice })}
                 />
               </Field>
             </div>
@@ -519,14 +555,7 @@ export default function EditorForm({ data, onChange }: Props) {
         <div className="text-[12px] tracking-[0.14em] uppercase text-neutral-500">金額</div>
         <div className="grid grid-cols-3 gap-2">
           <Field label="折扣">
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              className={inputClass}
-              value={data.discount}
-              onChange={(e) => set('discount', Number(e.target.value))}
-            />
+            <AmountInput value={data.discount} onChange={(discount) => set('discount', discount)} />
           </Field>
           <Field label="折扣方式">
             <select
@@ -539,14 +568,7 @@ export default function EditorForm({ data, onChange }: Props) {
             </select>
           </Field>
           <Field label="稅率 %">
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              className={inputClass}
-              value={data.taxRate}
-              onChange={(e) => set('taxRate', Number(e.target.value))}
-            />
+            <AmountInput value={data.taxRate} onChange={(taxRate) => set('taxRate', taxRate)} />
           </Field>
         </div>
         <div className="rounded-xl bg-white border border-neutral-300 px-3 py-3 text-[13px] space-y-1">
